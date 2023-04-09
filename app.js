@@ -59,44 +59,49 @@
 // Створення змінних та вкладання в них встроєнних модулів
 const http = require('http');
 const fs = require('fs');
+const url = require('url')
+
+const arr = [
+   { id: '/1', text: 'text1' },
+   { id: '/2', text: 'text2' }
+];
 
 const server = http.createServer((req, res) => {
-   // Обробка для головної сторінки
-   if (req.url === '/' || req.url === '/index.html') {
-      // Знаходимо та читаємо файл index.html
+   const item = arr.find((item) => item.id === req.url);
+   if (item) {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end(item.text);
+   } else if (req.url === '/' || req.url === '/index.html') {
       fs.readFile('index.html', (err, data) => {
          if (err) {
             res.writeHead(500, { 'Content-Type': 'text/plain' });
             res.end('Internal Server Error');
             return;
          }
-         // Віддаємо файл index.html разом з заголовками
          res.writeHead(200, { 'Content-Type': 'text/html' });
          res.end(data);
       });
-   }
-   // Обробка цсс файлу
-   else if (req.url === '/styles/main.css') {
-      // Читаємо файл цсс
+   } else if (req.url === '/styles/main.css') {
       fs.readFile('./styles/main.css', (err, data) => {
          if (err) {
             res.writeHead(500, { 'Content-Type': 'text/css' });
             res.end('Internal Server Error');
             return;
          }
-         // Віддаємо файл цсс з http заголовками
          res.writeHead(200, { 'Content-Type': 'text/css' });
          res.end(data);
       });
-   }
-   else if (req.url === '/' || req.url === '/img/catalog.jpg') {
+   } else if (req.url === '/img/catalog.jpg') {
       fs.readFile('./img/catalog.jpg', (err, data) => {
-         res.setHeader(200, { 'Content-Type': 'image/jpeg' });
-         res.end(data)
-      })
-   }
-   // Оброка для незнайомих маршрутів
-   else {
+         if (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Internal Server Error');
+            return;
+         }
+         res.setHeader('Content-Type', 'image/jpeg');
+         res.end(data);
+      });
+   } else {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('SHO TI TUT ZABUV IDI GULYAU!!!');
    }
